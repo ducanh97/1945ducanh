@@ -1,5 +1,9 @@
 package Model;
 
+import Controller.CollisionManager;
+
+import java.awt.*;
+
 /**
  * Created by ADMIN on 4/15/2017.
  */
@@ -8,6 +12,24 @@ public class GameRect {
 	private int y;
 	private int width;
 	private int height;
+	private boolean invisible;
+    private boolean isDead;
+
+	public boolean isDead() {
+		return isDead;
+	}
+
+	public void setDead(boolean dead) {
+		isDead = dead;
+	}
+
+	public boolean isInvisible() {
+		return invisible;
+	}
+
+	public void setInvisible(boolean invisible) {
+		this.invisible = invisible;
+	}
 
 	public int getX() {
 		return x;
@@ -36,5 +58,13 @@ public class GameRect {
 	public void move(int dx, int dy){
 		this.x += dx;
 		this.y += dy;
+	}
+
+	public boolean intersects(GameRect other){
+
+		Rectangle rectangle = new Rectangle(x,y,width,height);
+		Rectangle rectangle1 = new Rectangle(other.x,other.y,other.width,other.height);
+
+		return rectangle.intersects(rectangle1);
 	}
 }

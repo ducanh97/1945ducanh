@@ -1,17 +1,17 @@
+package GAme;
+
 import Model.GameRect;
-import Ultilities.Ultilities;
 import View.ImageRender;
+import Controller.CollisionManager;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
  * Created by ADMIN on 13/04/2017.
  */
-public class EnemyController {
-    private GameRect gameRect;
-    private ImageRender imageRender;
+public class EnemyController extends Controller implements Collider{
+
     private Image image;
     private  ArrayList<Bullet> enemyBullets;
     Graphics backBufferGraphic;
@@ -24,18 +24,19 @@ public class EnemyController {
         this.enemyBullets = enemyBullets;
     }
 
-
-
     public EnemyController(int x, int y, Image image, ArrayList<Bullet> enemyBullets) {
-       gameRect = new GameRect(x,y,image.getWidth(null),image.getHeight(null));
-       imageRender = new ImageRender(image);
-        this.enemyBullets = enemyBullets;
-        enemyBullets = new ArrayList<>();
+       this.gameRect = new GameRect(x,y,image.getWidth(null),image.getHeight(null));
+       this.imageRender = new ImageRender(image);
+       this.enemyBullets = enemyBullets;
+       enemyBullets = new ArrayList<>();
+       CollisionManager.instance.add(this);
     }
 
     public GameRect getGameRect() {
         return gameRect;
     }
+
+
 
     public Image getImage() {
         return image;
@@ -45,17 +46,17 @@ public class EnemyController {
         this.image = image;
     }
 
-    public void draw(Graphics graphics) {
-        imageRender.render(graphics,gameRect);
-    }
+
 
     public void update(int dx, int dy){
         gameRect.move(dx,dy);
     }
+
     public void createBullet(Image bulletImage){
         Bullet ebullet = null;
         try {
-            ebullet = new Bullet(gameRect.getX(),gameRect.getY(), bulletImage);
+            ebullet = new Bullet(gameRect.getX(),gameRect.getY(), bulletImage,"enemy");
+//            CollisionManager.instance.add(ebullet);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,15 +65,24 @@ public class EnemyController {
 
     }
 
-    public void shoot(){
+    public void shoot(){//???
         for (Bullet b : enemyBullets) {
             b.updateEnemies();
         }
-
-
-
-
     }
 
+    public void getHit(int damage){
+        System.out.println("xxx");
+        gameRect.setDead(true);
+        System.out.println("may bay dich chet");
+        CollisionManager.instance.remove(this);
+    }
+
+    @Override
+    public void onCollide(Collider other) {
+        if(other instanceof Bullet){
+            ((Bullet)other).getHit(1);
+        }
+    }
 
 }

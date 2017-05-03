@@ -1,28 +1,46 @@
+package GAme;
+
 import Model.GameRect;
 import View.ImageRender;
+import Controller.CollisionManager;
 
 import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
  * Created by ADMIN on 4/12/2017.
  */
-public class PlaneController {
+public class PlaneController extends Controller implements Collider {
 	private GameRect gameRect;
 	private ImageRender imageRender;
 	private ArrayList<Bullet> bullets;
 	private int dx = 0;
 	private int dy = 0;
-
+    private int HP;
 	public PlaneController(int x, int y, Image image, ArrayList<Bullet> bullets) {
-		gameRect = new GameRect(x, y, 70, 50);
-		imageRender = new ImageRender(image);
+		this.gameRect = new GameRect(x, y, 70, 50);
+		this.imageRender = new ImageRender(image);
 		this.bullets = bullets;
+		this.HP = 1000;
+		CollisionManager.instance.add(this);
 	}
 
 	public GameRect getGameRect() {
 		return gameRect;
+	}
+
+	@Override
+	public void onCollide(Collider other) {
+    if(other instanceof EnemyController){
+//		System.out.println("May bay bi ban chet");
+		((EnemyController) other).getHit(1);
+	} else if (other instanceof  Bullet){
+		((Bullet) other).getHit(1);
+	} else if(other instanceof  ExtraHP){
+		HP+=200;
+		((ExtraHP) other).getHit(1);
+
+	}
 	}
 
 	public void draw(Graphics graphics) {
@@ -58,5 +76,22 @@ public class PlaneController {
 
 	public void setBullets(ArrayList<Bullet> bullets) {
 		this.bullets = bullets;
+	}
+
+	public void getHit(int damage){
+		System.out.println("May bay chet");
+		HP-=damage;
+		if(HP <=0) {
+			CollisionManager.instance.remove(this);
+			gameRect.setDead(true);
+		}
+	}
+
+	public String getHP() {
+		if(HP<=0){
+			return "You dead bitch!";
+		}
+		return "HP : " + HP;
+
 	}
 }

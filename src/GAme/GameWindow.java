@@ -1,4 +1,5 @@
-import Model.GameRect;
+package GAme;
+
 import Ultilities.Ultilities;
 
 import javax.imageio.ImageIO;
@@ -11,7 +12,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
+
+import Controller.CollisionManager;
 
 /**
  * Created by 123 on 09/04/2017.
@@ -35,8 +39,13 @@ public class GameWindow extends Frame {
 	public Ultilities ul;
 	public int shootingTime = 0;
 	public int shootingTime2 = 0;
-	public ArrayList planeList;
-	public ArrayList<Bullet> bulletList;
+	private int ExtraHPTime = 6000;
+	private boolean haveExtraHP;
+
+	private ArrayList<ExtraHP> HPList;
+
+
+	private CollisionManager collisionManager;
 
 	/**
 	 *
@@ -63,17 +72,10 @@ public class GameWindow extends Frame {
 		enemies2 = new ArrayList<>();
 		enemiesBullets = new ArrayList<>();
 		ul = new Ultilities();
+		HPList = new ArrayList<>();
 
-		planeList = new ArrayList();
-		bulletList = new ArrayList();
 
-		for (EnemyController e : enemies) {
-			bulletList.addAll(e.getEnemyBullets());
-		}
-
-		for (EnemyController e : enemies2) {
-			bulletList.addAll(e.getEnemyBullets());
-		}
+//		collisionManager = new CollisionManager();
 
 
 		addWindowListener(new WindowListener() {
@@ -188,8 +190,8 @@ public class GameWindow extends Frame {
 					if (isSpacePressed && isCooledDown) {
 						Bullet bullet = null;
 						try {
-							bullet = new Bullet(plane.getGameRect().getX(), plane.getGameRect().getY(), Ultilities.loadImage("res/bullet.png"));
-							System.out.println("Cos bullet");
+							bullet = new Bullet(plane.getGameRect().getX(), plane.getGameRect().getY(), Ultilities.loadImage("res/bullet.png"),"plane");
+
 
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -206,7 +208,7 @@ public class GameWindow extends Frame {
 					//Create Normal Enemy
 					Random rand = new Random();
 					int xEnemy = rand.nextInt(600);
-					int yEnemy = 0;
+					int yEnemy = 50;
 
 					enemyTime -= 17;
 					if (enemyTime < 0) {
@@ -235,12 +237,14 @@ public class GameWindow extends Frame {
 						if (shootingTime <= 0) {
 							try {
 								en.createBullet(Ultilities.loadImage("res/enemy_bullet.png"));
+
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
 						}
 						en.shoot();
 					}
+
 
 					if (shootingTime <= 0) {
 						shootingTime = 1500;
@@ -261,7 +265,7 @@ public class GameWindow extends Frame {
 						EnemyController enemy = null;
 						try {
 							enemy = new EnemyController(xEnemy2, yEnemy2, Ultilities.loadImage("res/plane1.png"), new ArrayList<Bullet>());
-							System.out.println("Enemy type-2 is here");
+
 							enemies2.add(enemy);
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -282,7 +286,7 @@ public class GameWindow extends Frame {
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
-							System.out.println("Type 2 pentakill");
+
 						}
 
 						ens.shoot();
@@ -291,39 +295,30 @@ public class GameWindow extends Frame {
 					if (shootingTime2 <= 0) {
 						shootingTime2 = 1500;
 					}
+//
+					ExtraHPTime-=20;
 
-					for (int i = 0; i < bullets.size(); i++) {
-						for (int j = 0; j < enemies.size(); j++) {
-							if (Ultilities.isHitted(bullets.get(i).getGameRect(), enemies.get(j).getGameRect())) {
-								enemies.remove(j);
-								bullets.remove(i);
-								System.out.println("Chet me may roi");
-								i--;
-								j--;
-
-							}
-						}
-
-						for (int j = 0; j < enemies2.size(); j++) {
-							if (Ultilities.isHitted(bullets.get(i).getGameRect(), enemies2.get(j).getGameRect())) {
-								enemies2.remove(j);
-								bullets.remove(i);
-								System.out.println("Chet me may roi");
-								i--;
-								j--;
-
-							}
-						}
-					}
-					for (int i = 0; i < enemies.size(); i++) {
-						for (int j = 0; j < enemies.get(i).getEnemyBullets().size(); j++) {
-							if (Ultilities.isHitted(enemies.get(i).getEnemyBullets().get(j).getGameRect(), plane.getGameRect())) {
-								enemies.get(i).getEnemyBullets().remove(j);
-								System.out.println("CHETTTTTTTTTTTT");
-							}
-						}
+					if(ExtraHPTime <=0){
+						haveExtraHP = true;
+						ExtraHPTime = 6000;
 					}
 
+					if(haveExtraHP){
+						haveExtraHP = false;
+					ExtraHP extraHP =null;
+						try {
+							extraHP = new ExtraHP(rand.nextInt(600),0,Ultilities.loadImage("res/power-up.png"));
+						HPList.add(extraHP);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+					}
+
+
+
+					//Check va cham
+					CollisionManager.instance.update();
 
 					repaint();
 				}
@@ -337,28 +332,99 @@ public class GameWindow extends Frame {
 	@Override
 	public void update(Graphics g) {
 		backBufferGraphic.drawImage(backgroundImage, 0, 0, 400, 600, null);
-		plane.draw(backBufferGraphic);
+
+		backBufferGraphic.drawString(plane.getHP(),50,50);
+		if(!plane.getGameRect().isDead()){
+			plane.draw(backBufferGraphic);
+		}
+
+		 for(ExtraHP extraHP : HPList){
+			 extraHP.update();
+			extraHP.draw(backBufferGraphic);
+		}
+
+
 		for (Bullet bullet : bullets) {
 			bullet.draw(backBufferGraphic);
-
-		}
-		for (int i = 0; i < enemies.size(); i++) {
-			enemies.get(i).draw(backBufferGraphic);
-			for (int j = 0; j < enemies.get(i).getEnemyBullets().size(); j++) {
-				enemies.get(i).getEnemyBullets().get(j).draw(backBufferGraphic);
-			}
-
 		}
 
-		for (int i = 0; i < enemies2.size(); i++) {
-			enemies2.get(i).draw(backBufferGraphic);
-			for (int j = 0; j < enemies2.get(i).getEnemyBullets().size(); j++) {
-				enemies2.get(i).getEnemyBullets().get(j).draw(backBufferGraphic);
+		for (EnemyController enemyController : enemies) {
+			enemyController.draw(backBufferGraphic);
+			for(Bullet bullet : enemyController.getEnemyBullets()){
+				bullet.draw(backBufferGraphic);
 			}
+		}
 
+		for (EnemyController enemyController : enemies2) {
+			enemyController.draw(backBufferGraphic);
+			for(Bullet bullet : enemyController.getEnemyBullets()){
+				bullet.draw(backBufferGraphic);
+			}
+		}
+
+
+		Iterator<EnemyController> enemyControllerIterator = enemies.iterator();
+		while (enemyControllerIterator.hasNext()) {
+			EnemyController enemyController = enemyControllerIterator.next();
+			if (enemyController.getGameRect().isDead()) {
+				enemyControllerIterator.remove();
+			}
+					}
+
+
+		for(int i =0;i<enemies.size();i++){
+			Iterator<Bullet> bulletIterator =enemies.get(i).getEnemyBullets().iterator();
+			while (bulletIterator.hasNext()) {
+				Bullet bullet = bulletIterator.next();
+				if (bullet.getGameRect().isDead()) {
+					bulletIterator.remove();
+
+				}
+			}
+		}
+
+		Iterator<ExtraHP> extraHPIterator = HPList.iterator();
+		while (extraHPIterator.hasNext()) {
+			ExtraHP extraHP = extraHPIterator.next();
+			if (extraHP.getGameRect().isDead()) {
+				extraHPIterator.remove();
+			}
+		}
+
+		Iterator<EnemyController> enemyControllerIterator2 = enemies2.iterator();
+		while (enemyControllerIterator2.hasNext()) {
+			EnemyController enemyController2 = enemyControllerIterator2.next();
+			if (enemyController2.getGameRect().isDead()) {
+				enemyControllerIterator2.remove();
+				Random rand = new Random();
+//				if(rand.nextInt(10)==1){
+//					isHeartAppear = true;
+//				}
+			}
+		}
+
+		for(int i =0;i<enemies2.size();i++){
+			Iterator<Bullet> bulletIterator =enemies2.get(i).getEnemyBullets().iterator();
+			while (bulletIterator.hasNext()) {
+				Bullet bullet = bulletIterator.next();
+				if (bullet.getGameRect().isDead()) {
+					bulletIterator.remove();
+
+				}
+			}
+		}
+
+		Iterator<Bullet> bulletIterator = bullets.iterator();
+		while (bulletIterator.hasNext()) {
+			Bullet bullet = bulletIterator.next();
+			if (bullet.getGameRect().isDead()) {
+				bulletIterator.remove();
+
+			}
 		}
 
 
 		g.drawImage(backBufferImage, 0, 0, null);
+
 	}
 }
