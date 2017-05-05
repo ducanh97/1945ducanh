@@ -14,6 +14,7 @@ public class EnemyController extends Controller implements Collider{
 
     private Image image;
     private  ArrayList<Bullet> enemyBullets;
+    private String type;
     Graphics backBufferGraphic;
 
     public ArrayList<Bullet> getEnemyBullets() {
@@ -24,10 +25,11 @@ public class EnemyController extends Controller implements Collider{
         this.enemyBullets = enemyBullets;
     }
 
-    public EnemyController(int x, int y, Image image, ArrayList<Bullet> enemyBullets) {
+    public EnemyController(int x, int y, Image image, ArrayList<Bullet> enemyBullets,String type) {
        this.gameRect = new GameRect(x,y,image.getWidth(null),image.getHeight(null));
        this.imageRender = new ImageRender(image);
        this.enemyBullets = enemyBullets;
+       this.type = type;
        enemyBullets = new ArrayList<>();
        CollisionManager.instance.add(this);
     }
@@ -55,8 +57,7 @@ public class EnemyController extends Controller implements Collider{
     public void createBullet(Image bulletImage){
         Bullet ebullet = null;
         try {
-            ebullet = new Bullet(gameRect.getX(),gameRect.getY(), bulletImage,"enemy");
-//            CollisionManager.instance.add(ebullet);
+            ebullet = new Bullet(gameRect.getX() + (gameRect.getWidth()/2),gameRect.getY() +(gameRect.getHeight()/2), bulletImage,"enemy");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,16 +66,14 @@ public class EnemyController extends Controller implements Collider{
 
     }
 
-    public void shoot(){//???
+    public void shoot(int dx,int dy){//???
         for (Bullet b : enemyBullets) {
-            b.updateEnemies();
+            b.getGameRect().move(dx,dy);
         }
     }
 
     public void getHit(int damage){
-        System.out.println("xxx");
         gameRect.setDead(true);
-        System.out.println("may bay dich chet");
         CollisionManager.instance.remove(this);
     }
 
@@ -85,4 +84,7 @@ public class EnemyController extends Controller implements Collider{
         }
     }
 
+    public String getType() {
+        return type;
+    }
 }

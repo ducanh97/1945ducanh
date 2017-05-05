@@ -13,7 +13,7 @@ public class CollisionManager {
 
 	public static final CollisionManager instance = new CollisionManager();
 	private ArrayList<Collider> colliders;
-	private int cham;
+
 
 	private CollisionManager() {
 		colliders = new ArrayList<>();
@@ -21,8 +21,7 @@ public class CollisionManager {
 
 
 	public void update() {
-		cham = 0;
-		for (int i = 0; i < colliders.size() - 1; i++) {
+				for (int i = 0; i < colliders.size() - 1; i++) {
 			for (int j = i + 1; j < colliders.size(); j++) {
 				Collider ci = colliders.get(i);
 				Collider cj = colliders.get(j);
@@ -35,18 +34,13 @@ public class CollisionManager {
 
 					if (cj.getClass().equals(ci.getClass())) {
 
-					} else if (cj instanceof Bullet && ((Bullet) cj).getType().equals("plane") && i == 0) {
+					} else if (cj instanceof Bullet && ((Bullet) cj).getType().contains("plane") && i == 0) {
 
 					} else if ((cj instanceof Bullet && ((Bullet) cj).getType().equals("enemy") && ci instanceof EnemyController) || ((ci instanceof Bullet && ((Bullet) ci).getType().equals("enemy") && cj instanceof EnemyController))) {
 
 					} else{
 						ci.onCollide(cj);
 						cj.onCollide(ci);
-
-						if (i == 0) {
-							System.out.println("Da cham nhau" + ci.toString() + " " + cj.toString() + cham + " size " + colliders.size());
-							cham++;
-						}
 						i--;
 						j--;
 						break;

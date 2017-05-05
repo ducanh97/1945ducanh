@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class Bullet extends Controller implements Collider {
 	private int damage = 100;
-	private String type ;
+	private String type;
 
 
 	public Bullet(int bulletX, int bulletY, Image bulletImage, String type) {
@@ -26,8 +26,7 @@ public class Bullet extends Controller implements Collider {
 	public void onCollide(Collider other) {
 		if (other instanceof EnemyController) {
 			((EnemyController) other).getHit(damage);
-		}
-		else if( other instanceof PlaneController){
+		} else if (other instanceof PlaneController) {
 			((PlaneController) other).getHit(damage);
 		}
 	}
@@ -38,7 +37,13 @@ public class Bullet extends Controller implements Collider {
 	}
 
 	public void update() {
-		gameRect.move(0, -5);
+		if (type.equals("plane-left")) {
+			gameRect.move(-2, -2);
+		} else if (type.equals("plane-right")) {
+			gameRect.move(2, -2);
+		} else {
+			gameRect.move(0, -5);
+		}
 	}
 
 	public void updateEnemies() {

@@ -25,7 +25,11 @@ public class Controller {
 		imageRender.render(graphics,gameRect);
 	}
 
-	public void update(){
+	public GameRect getGameRect() {
+		return gameRect;
+	}
 
+	public void update(int dx,int dy){
+        getGameRect().move(dx,dy);
 	}
 }

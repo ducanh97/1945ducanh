@@ -13,15 +13,16 @@ import java.util.ArrayList;
 public class PlaneController extends Controller implements Collider {
 	private GameRect gameRect;
 	private ImageRender imageRender;
-	private ArrayList<Bullet> bullets;
 	private int dx = 0;
 	private int dy = 0;
-    private int HP;
-	public PlaneController(int x, int y, Image image, ArrayList<Bullet> bullets) {
+	private int HP;
+	public int level;
+
+	public PlaneController(int x, int y, Image image) {
 		this.gameRect = new GameRect(x, y, 70, 50);
 		this.imageRender = new ImageRender(image);
-		this.bullets = bullets;
 		this.HP = 1000;
+		this.level = 1;
 		CollisionManager.instance.add(this);
 	}
 
@@ -31,16 +32,15 @@ public class PlaneController extends Controller implements Collider {
 
 	@Override
 	public void onCollide(Collider other) {
-    if(other instanceof EnemyController){
-//		System.out.println("May bay bi ban chet");
-		((EnemyController) other).getHit(1);
-	} else if (other instanceof  Bullet){
-		((Bullet) other).getHit(1);
-	} else if(other instanceof  ExtraHP){
-		HP+=200;
-		((ExtraHP) other).getHit(1);
+		if (other instanceof EnemyController) {
+			((EnemyController) other).getHit(1);
+		} else if (other instanceof Bullet) {
+			((Bullet) other).getHit(1);
+		} else if (other instanceof ExtraHP) {
+			HP += 200;
+			((ExtraHP) other).getHit(1);
 
-	}
+		}
 	}
 
 	public void draw(Graphics graphics) {
@@ -51,7 +51,7 @@ public class PlaneController extends Controller implements Collider {
 							 boolean isDownPressed,
 							 boolean isLeftPressed,
 							 boolean isRightPressed
-							) {
+	) {
 
 		if (isUpPressed) {
 			dy -= 3;
@@ -65,33 +65,36 @@ public class PlaneController extends Controller implements Collider {
 		if (isRightPressed) {
 			dx += 3;
 		}
-		getGameRect().move(dx,dy);
-		dx =0;
-		dy =0;
+		getGameRect().move(dx, dy);
+		dx = 0;
+		dy = 0;
 	}
 
-	public ArrayList<Bullet> getBullets() {
-		return bullets;
-	}
-
-	public void setBullets(ArrayList<Bullet> bullets) {
-		this.bullets = bullets;
-	}
-
-	public void getHit(int damage){
-		System.out.println("May bay chet");
-		HP-=damage;
-		if(HP <=0) {
+	public void getHit(int damage) {
+		HP -= damage;
+		if (HP <= 0) {
 			CollisionManager.instance.remove(this);
 			gameRect.setDead(true);
 		}
 	}
 
 	public String getHP() {
-		if(HP<=0){
+		if (HP <= 0) {
 			return "You dead bitch!";
 		}
 		return "HP : " + HP;
 
+	}
+
+
+
+	public String getLevel() {
+		return "Level : " +  level + "";
+	}
+
+
+
+	public void setLevelUp() {
+		level +=1;
 	}
 }
